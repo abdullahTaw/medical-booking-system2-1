@@ -6,9 +6,13 @@ use App\Http\Controllers\Admin\CenterController;
 use App\Http\Controllers\Admin\CityController;
 use App\Http\Controllers\Admin\CountryController;
 use App\Http\Controllers\Admin\MessageController;
+use App\Http\Controllers\Auth\PatientRegisterController;
+use App\Http\Controllers\DashboardProfileController;
 use App\Http\Controllers\Front\FrontController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\Patient\PatientProfileController;
+use App\Http\Controllers\Patient\RatingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\User\AppointmentController as UserAppointmentController;
 use App\Http\Controllers\User\OrderController as UserOrderController;
@@ -26,10 +30,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// ✅ صفحة انتظار الموافقة — بعد التسجيل
 Route::get('/register/pending', function () {
     return view('auth.pending');
 })->name('register.pending');
+
+// ✅ تسجيل المرضى — مسار منفصل عن تسجيل العيادات
+Route::get('/register/patient', [PatientRegisterController::class, 'create'])->name('patient.register');
+Route::post('/register/patient', [PatientRegisterController::class, 'store'])->name('patient.register.store');
 
 require __DIR__.'/auth.php';
 
@@ -52,7 +59,6 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'r
     Route::resource('center', CenterController::class);
     Route::put('center-status/{id}', [CenterController::class, 'changeStatus'])->name('center.status');
 
-    // ✅ موافقة ورفض الترخيص — داخل مجموعة admin لحمايتها
     Route::get('center/{id}/approve-license', [CenterController::class, 'approveLicense'])->name('center.approve-license');
     Route::get('center/{id}/reject-license',  [CenterController::class, 'rejectLicense'])->name('center.reject-license');
 
@@ -60,10 +66,14 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => ['auth', 'r
     Route::delete('/message/{id}', [MessageController::class, 'destroy'])->name('message.destroy');
 });
 
-// User routes
-Route::group(['as' => 'user.', 'middleware' => ['auth', 'role:user']], function () {
+Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::get('/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
+    Route::get('/pending-approval', function () {
+        return view('user.pending-approval');
+    })->name('user.pending');
+});
 
-    Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
+Route::group(['as' => 'user.', 'middleware' => ['auth', 'role:user', 'license.approved']], function () {
 
     Route::get('general-setting', [UserSettingController::class, 'index'])->name('general-setting');
     Route::put('update-general-setting', [UserSettingController::class, 'updateGeneralSetting'])->name('update-general-setting');
@@ -92,5 +102,25 @@ Route::get('/center/{ID}', [FrontController::class, 'center'])->name('site.cente
 Route::post('/order', [FrontController::class, 'order'])->name('site.order');
 Route::post('/contact', [FrontController::class, 'storem'])->name('contact.store');
 Route::get('/get-cities/{countryId}', [FrontController::class, 'getCities']);
+Route::get('/about', [FrontController::class, 'about'])->name('site.about');
 
 Route::post('/locale/switch', [LocaleController::class, 'switch'])->name('locale.switch');
+
+// ===== Patient (مريض) =====
+Route::middleware(['auth', 'role:patient'])->group(function () {
+    Route::get('/my-profile', [PatientProfileController::class, 'show'])->name('patient.profile');
+    Route::post('/my-profile', [PatientProfileController::class, 'update'])->name('patient.profile.update');
+    Route::post('/my-profile/password', [PatientProfileController::class, 'updatePassword'])->name('patient.profile.password');
+    Route::post('/my-profile/delete', [PatientProfileController::class, 'destroy'])->name('patient.profile.destroy');
+
+    Route::post('/rating', [RatingController::class, 'store'])->name('rating.store');
+    Route::post('/rating/{centerId}/delete', [RatingController::class, 'destroy'])->name('rating.destroy');
+});
+
+// ===== Dashboard profile (admin + clinic) =====
+Route::middleware('auth')->group(function () {
+    Route::get('/my-account', [DashboardProfileController::class, 'show'])->name('dashboard.profile');
+    Route::post('/my-account', [DashboardProfileController::class, 'update'])->name('dashboard.profile.update');
+    Route::post('/my-account/password', [DashboardProfileController::class, 'updatePassword'])->name('dashboard.profile.password');
+    Route::post('/my-account/delete', [DashboardProfileController::class, 'destroy'])->name('dashboard.profile.destroy');
+});

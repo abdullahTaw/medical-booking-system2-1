@@ -12,21 +12,20 @@
     <link rel="stylesheet" href="{{ asset('assets/css/vendor/slick.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/vendor/aos.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}" />
-    <title>{{ __('site.register') }}</title>
+    <title>{{ app()->getLocale() == 'ar' ? 'تسجيل مريض جديد' : 'Patient Registration' }}</title>
+
     @if(app()->getLocale() == 'ar')
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700&display=swap" rel="stylesheet">
     <style> body { font-family: 'Cairo', sans-serif; } </style>
     @endif
+
     <style>
         .lang-btn { background:transparent; border:1.5px solid #3498db; color:#3498db; border-radius:6px; padding:4px 12px; font-size:13px; cursor:pointer; font-weight:500; }
         .lang-btn:hover { background:#3498db; color:#fff; }
         .password-wrapper { position:relative; display:flex; align-items:center; }
         .password-wrapper input { width:100%; padding-inline-end:40px; }
-        .toggle-password { position:absolute; inset-inline-end:10px; background:none; border:none; cursor:pointer; color:#7f8c8d; font-size:16px; padding:0; line-height:1; transition:color 0.2s; }
+        .toggle-password { position:absolute; inset-inline-end:10px; background:none; border:none; cursor:pointer; color:#7f8c8d; font-size:16px; }
         .toggle-password:hover { color:#3498db; }
-        .patient-register-link { text-align:center; font-size:13px; color:#888; margin-bottom:20px; }
-        .patient-register-link a { color:#6a0dad; font-weight:600; text-decoration:none; }
-        .patient-register-link a:hover { text-decoration:underline; }
 
         .patient-dropdown-menu { display:none; position:absolute; left:0; top:100%; background:#fff; border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,0.12); min-width:160px; z-index:9999; overflow:hidden; }
         .patient-dropdown-menu.show { display:block; }
@@ -57,16 +56,16 @@
             <div class="container-stretch">
                 <div class="h-bottom-inner">
                     <div class="p-left">
-                        <div class="logo"><a href="/"><img src="{{ asset('assets/images/logos/a1.PNG')}}" alt /></a></div>
-                        <div class="m-logo"><a href="/"><img src="{{ asset('assets/images/logos/a1.PNG')}}" alt /></a></div>
+                        <div class="logo"><a href="/"><img src="{{ asset('assets/images/logos/a1.PNG') }}" alt /></a></div>
+                        <div class="m-logo"><a href="/"><img src="{{ asset('assets/images/logos/a1.PNG') }}" alt /></a></div>
                     </div>
                     <div class="p-center">
                         <nav>
                             <ul class="main-nav">
                                 <li><a href="/">{{ __('site.home') }}</a></li>
-                                <li><a href="{{ route('site.centers') }}">{{ __('site.clinics') }}</a></li>
-                                <li><a href="/">{{ __('site.blog') }}</a></li>
-                                <li><a href="#Contact">{{ __('site.contact') }}</a></li>
+<li><a href="{{ route('site.centers') }}">{{ __('site.clinics') }}</a></li>
+<li><a href="{{ route('site.show') }}#Contact">{{ __('site.contact') }}</a></li>
+<li><a href="{{ route('site.about') }}">{{ __('about_us') }}</a></li>
                             </ul>
                         </nav>
                     </div>
@@ -125,12 +124,12 @@
     <aside id="m-nav-container">
         <div class="m-nav-inner">
             <button id="m-nav-close"><i class="fa-sharp fa-solid fa-xmark"></i></button>
-            <div class="logo"><img src="{{ asset('assets/images/logos/a1.PNG')}}" alt /></div>
+            <div class="logo"><img src="{{ asset('assets/images/logos/a1.PNG') }}" alt /></div>
             <ul class="main-nav">
                 <li><a href="/">{{ __('site.home') }}</a></li>
-<li><a href="{{ route('site.centers') }}">{{ __('site.clinics') }}</a></li>
-<li><a href="{{ route('site.show') }}#Contact">{{ __('site.contact') }}</a></li>
-<li><a href="{{ route('site.about') }}">{{ __('about_us') }}</a></li>
+                <li><a href="{{ route('site.centers') }}">{{ __('site.clinics') }}</a></li>
+                <li><a href="/">{{ __('site.blog') }}</a></li>
+                <li><a href="#Contact">{{ __('site.contact') }}</a></li>
             </ul>
 
             <div class="m-nav-auth">
@@ -166,39 +165,40 @@
             <div class="row">
                 <div class="col-12">
                     <div class="login-main__form">
-                        <form method="POST" action="{{ route('register') }}" class="form" enctype="multipart/form-data">
+                        <form method="POST" action="{{ route('patient.register.store') }}" class="form">
                             @csrf
-                            <h3 class="frm-header">{{ __('site.register') }}</h3>
+                            <h3 class="frm-header">
+                                {{ app()->getLocale() == 'ar' ? 'إنشاء حساب مريض' : 'Create Patient Account' }}
+                            </h3>
                             <p style="text-align:center; font-size:13px; color:#7f8c8d; margin-bottom:16px;">
-                                {{ app()->getLocale() == 'ar' ? 'هذا التسجيل مخصص لأصحاب العيادات فقط.' : 'This registration is for clinic owners only.' }}
-                            </p>
-
-                            <p class="patient-register-link">
-                                {{ app()->getLocale() == 'ar' ? 'مريض؟' : 'Patient?' }}
-                                <a href="{{ route('patient.register') }}">
-                                    {{ app()->getLocale() == 'ar' ? 'سجّل من هنا' : 'Register here' }}
-                                </a>
+                                {{ app()->getLocale() == 'ar' ? 'سجل حسابك لحجز المواعيد الطبية' : 'Register your account to book appointments' }}
                             </p>
 
                             <div class="inner-wrap">
-                                <div class="input-grp">
-                                    <div class="s-input">
-                                        <label for="name">{{ app()->getLocale() == 'ar' ? 'الاسم' : 'Name' }}*</label>
-                                        <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus
-                                            placeholder="{{ app()->getLocale() == 'ar' ? 'اسمك الكامل' : 'Full Name' }}" />
-                                        @error('name')<span style="color:red;font-size:12px;">{{ $message }}</span>@enderror
-                                    </div>
-                                    <div class="s-input">
-                                        <label for="email">{{ __('site.contact_email_lbl') }}*</label>
-                                        <input id="email" type="text" name="email" value="{{ old('email') }}" required
-                                            placeholder="{{ __('site.contact_email_lbl') }}" />
-                                        @error('email')<span style="color:red;font-size:12px;">{{ $message }}</span>@enderror
-                                    </div>
+                                <div class="s-input">
+                                    <label>{{ app()->getLocale() == 'ar' ? 'الاسم الكامل' : 'Full Name' }}*</label>
+                                    <input type="text" name="name" value="{{ old('name') }}" required autofocus
+                                        placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل اسمك الكامل' : 'Enter your full name' }}" />
+                                    @error('name')<span style="color:red;font-size:12px;">{{ $message }}</span>@enderror
+                                </div>
+
+                                <div class="s-input">
+                                    <label>{{ app()->getLocale() == 'ar' ? 'البريد الإلكتروني' : 'Email' }}*</label>
+                                    <input type="email" name="email" value="{{ old('email') }}" required
+                                        placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل بريدك الإلكتروني' : 'Enter your email' }}" />
+                                    @error('email')<span style="color:red;font-size:12px;">{{ $message }}</span>@enderror
+                                </div>
+
+                                <div class="s-input">
+                                    <label>{{ app()->getLocale() == 'ar' ? 'رقم الهاتف' : 'Phone Number' }}*</label>
+                                    <input type="text" name="phone" value="{{ old('phone') }}" required
+                                        placeholder="{{ app()->getLocale() == 'ar' ? 'أدخل رقم الهاتف' : 'Enter phone number' }}" />
+                                    @error('phone')<span style="color:red;font-size:12px;">{{ $message }}</span>@enderror
                                 </div>
 
                                 <div class="input-grp">
                                     <div class="s-input">
-                                        <label for="password">{{ app()->getLocale() == 'ar' ? 'كلمة المرور' : 'Password' }}*</label>
+                                        <label>{{ app()->getLocale() == 'ar' ? 'كلمة المرور' : 'Password' }}*</label>
                                         <div class="password-wrapper">
                                             <input id="password" type="password" name="password" required autocomplete="new-password" placeholder="********" />
                                             <button type="button" class="toggle-password" data-target="password"><i class="fa-regular fa-eye"></i></button>
@@ -207,94 +207,11 @@
                                         @error('password')<span style="color:red;font-size:12px;">{{ $message }}</span>@enderror
                                     </div>
                                     <div class="s-input">
-                                        <label for="password_confirmation">{{ app()->getLocale() == 'ar' ? 'تأكيد كلمة المرور' : 'Confirm Password' }}*</label>
+                                        <label>{{ app()->getLocale() == 'ar' ? 'تأكيد كلمة المرور' : 'Confirm Password' }}*</label>
                                         <div class="password-wrapper">
                                             <input id="password_confirmation" type="password" name="password_confirmation" required placeholder="********" />
                                             <button type="button" class="toggle-password" data-target="password_confirmation"><i class="fa-regular fa-eye"></i></button>
                                         </div>
-                                        @error('password_confirmation')<span style="color:red;font-size:12px;">{{ $message }}</span>@enderror
-                                    </div>
-                                </div>
-
-                                <div class="s-input">
-                                    <label for="clinic_name">{{ app()->getLocale() == 'ar' ? 'اسم العيادة' : 'Clinic Name' }}*</label>
-                                    <input id="clinic_name" type="text" name="clinic_name" value="{{ old('clinic_name') }}" required
-                                        placeholder="{{ app()->getLocale() == 'ar' ? 'اسم العيادة' : 'Clinic Name' }}" />
-                                    @error('clinic_name')<span style="color:red;font-size:12px;">{{ $message }}</span>@enderror
-                                </div>
-
-                                <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:12px;">
-                                    <div class="s-input" style="width:100%;">
-                                        @php $categories = App\Models\Category::active()->get(); @endphp
-                                        <label>{{ app()->getLocale() == 'ar' ? 'التخصص' : 'Category' }}*</label>
-                                        <select id="category" name="category_id" required style="width:100%;">
-                                            <option value="" disabled selected>{{ app()->getLocale() == 'ar' ? 'اختر التخصص' : 'Select Category' }}</option>
-                                            @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        @error('category_id')<span style="color:red;font-size:12px;">{{ $message }}</span>@enderror
-                                    </div>
-                                    <div style="display:flex; gap:12px; flex-wrap:wrap; width:100%;">
-                                        <div class="s-input" style="flex:1; min-width:160px;">
-                                            @php $countries = App\Models\Country::active()->get(); @endphp
-                                            <label>{{ app()->getLocale() == 'ar' ? 'الدولة' : 'Country' }}*</label>
-                                            <select id="country" name="country_id" required style="width:100%;">
-                                                <option value="" disabled selected>{{ app()->getLocale() == 'ar' ? 'اختر الدولة' : 'Select Country' }}</option>
-                                                @foreach ($countries as $country)
-                                                <option value="{{ $country->id }}" {{ old('country_id') == $country->id ? 'selected' : '' }}>{{ $country->name }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('country_id')<span style="color:red;font-size:12px;">{{ $message }}</span>@enderror
-                                        </div>
-                                        <div class="s-input" style="flex:1; min-width:160px;">
-                                            <label>{{ app()->getLocale() == 'ar' ? 'المدينة' : 'City' }}*</label>
-                                            <div id="city"></div>
-                                            @error('city_id')<span style="color:red;font-size:12px;">{{ $message }}</span>@enderror
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="input-grp">
-                                    <div class="s-input">
-                                        <label for="address">{{ app()->getLocale() == 'ar' ? 'العنوان' : 'Address' }}*</label>
-                                        <input id="address" type="text" name="address" value="{{ old('address') }}" required
-                                            placeholder="{{ app()->getLocale() == 'ar' ? 'عنوان العيادة' : 'Clinic Address' }}" />
-                                        @error('address')<span style="color:red;font-size:12px;">{{ $message }}</span>@enderror
-                                    </div>
-                                    <div class="s-input">
-                                        <label for="phone">{{ __('site.patient_phone') }}*</label>
-                                        <input id="phone" type="text" name="phone" value="{{ old('phone') }}" required
-                                            placeholder="{{ app()->getLocale() == 'ar' ? 'هاتف العيادة' : 'Clinic Phone' }}" />
-                                        @error('phone')<span style="color:red;font-size:12px;">{{ $message }}</span>@enderror
-                                    </div>
-                                </div>
-
-                                <div class="s-input">
-                                    <label for="currency_id">{{ app()->getLocale() == 'ar' ? 'عملة العيادة' : 'Clinic Currency' }}*</label>
-                                    @php $currencies = App\Models\Currency::orderBy('name')->get(); @endphp
-                                    <select id="currency_id" name="currency_id" required style="width:100%;">
-                                        <option value="" disabled selected>{{ app()->getLocale() == 'ar' ? 'اختر العملة' : 'Select Currency' }}</option>
-                                        @foreach ($currencies as $currency)
-                                        <option value="{{ $currency->id }}" {{ old('currency_id') == $currency->id ? 'selected' : '' }}>
-                                            {{ $currency->symbol }} — {{ $currency->name }}
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                    @error('currency_id')<span style="color:red;font-size:12px;">{{ $message }}</span>@enderror
-                                </div>
-
-                                <div class="input-grp">
-                                    <div class="s-input">
-                                        <label for="license_number">{{ app()->getLocale() == 'ar' ? 'رقم الترخيص الحكومي' : 'Government License Number' }}*</label>
-                                        <input id="license_number" type="text" name="license_number" value="{{ old('license_number') }}" required
-                                            placeholder="{{ app()->getLocale() == 'ar' ? 'رقم الترخيص الرسمي' : 'Official license number' }}" />
-                                        @error('license_number')<span style="color:red;font-size:12px;">{{ $message }}</span>@enderror
-                                    </div>
-                                    <div class="s-input">
-                                        <label for="license_file">{{ app()->getLocale() == 'ar' ? 'ملف الترخيص (PDF أو صورة)' : 'License File (PDF or Image)' }}*</label>
-                                        <input id="license_file" type="file" name="license_file" accept=".pdf,.jpg,.jpeg,.png" required style="padding:8px;" />
-                                        @error('license_file')<span style="color:red;font-size:12px;">{{ $message }}</span>@enderror
                                     </div>
                                 </div>
 
@@ -305,10 +222,12 @@
                                 </div>
 
                                 <div class="f-bottom">
-                                    <button class="btn btn-s2 btn-lg" type="submit">{{ __('site.register') }}</button>
+                                    <button class="btn btn-s2 btn-lg" type="submit">
+                                        {{ app()->getLocale() == 'ar' ? 'إنشاء الحساب' : 'Create Account' }}
+                                    </button>
                                     <p>
-                                        {{ app()->getLocale() == 'ar' ? 'لديك حساب بالفعل؟' : 'Already have an Account?' }}
-                                        <a href="{{ route('login') }}">{{ __('site.login') }}</a>
+                                        {{ app()->getLocale() == 'ar' ? 'لديك حساب بالفعل؟' : 'Already have an account?' }}
+                                        <a href="{{ route('login') }}">{{ app()->getLocale() == 'ar' ? 'تسجيل الدخول' : 'Login' }}</a>
                                     </p>
                                 </div>
                             </div>
@@ -370,31 +289,6 @@
                 else { input.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); }
             });
         });
-        document.getElementById('country').onchange = function() {
-            var countryId = this.value;
-            if (countryId) {
-                fetch(`/get-cities/${countryId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        var cityDiv = document.getElementById('city');
-                        cityDiv.innerHTML = '';
-                        if (data.cities && data.cities.length > 0) {
-                            var citySelect = document.createElement('select');
-                            citySelect.name = 'city_id'; citySelect.required = true; citySelect.style.width = '100%';
-                            var defaultOption = document.createElement('option');
-                            defaultOption.value = ''; defaultOption.disabled = true; defaultOption.selected = true;
-                            defaultOption.textContent = '{{ app()->getLocale() == "ar" ? "اختر المدينة" : "Select City" }}';
-                            citySelect.appendChild(defaultOption);
-                            data.cities.forEach(function(city) {
-                                var option = document.createElement('option');
-                                option.value = city.id; option.textContent = city.name;
-                                citySelect.appendChild(option);
-                            });
-                            cityDiv.appendChild(citySelect);
-                        }
-                    }).catch(error => console.error('Error:', error));
-            } else { document.getElementById('city').innerHTML = ''; }
-        };
     </script>
 </body>
 </html>

@@ -89,6 +89,10 @@
 "Notes": "ملاحظات",
 "Maintenance Mode": "وضع الصيانة",
 "Male": "ذكر",
-"Female": "أنثى"
-
+"Female": "أنثى",
+"licensed_by_moh":"مرخصة من وزارة الصحة",
+"verified":         "موثوقة",
+"We have emailed your password reset link.": "لقد أرسلنا رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني!",
+"Please wait before retrying.": "يرجى الانتظار قبل إعادة المحاولة.",
+"about_us": "من نحن"
 }

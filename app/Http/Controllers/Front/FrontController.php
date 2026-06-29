@@ -66,29 +66,42 @@ class FrontController extends Controller
         return response()->json(['cities' => $cities]);
     }
 
-    public function order(Request $request)
-    {
-        $validated = $request->validate([
-            'name'             => 'required|string|max:255',
-            'email'            => 'nullable|email',
-            'phone'            => 'required|string',
-            'appointment_date' => 'nullable|date',
-            'notes'            => 'nullable|string',
-            'service_id'       => 'nullable',
-            'gender'           => 'nullable|in:male,female',
-            'center_id'        => 'required',
-        ]);
 
-        $email = Center::find($request->center_id)->user->email;
-
-        // FIX: كان الرابط hardcoded على http://127.0.0.1:8000 — صححنا إلى route()
-        $url = route('user.order.index');
-        Mail::raw("طلب حجز جديد! راجع الطلبات على لوحة التحكم: {$url}", function ($message) use ($email) {
-            $message->to($email)->subject('طلب حجز جديد');
-        });
-
-        Order::create($validated);
-
-        return redirect()->back()->with('success', 'Your order has been sent!');
+public function order(Request $request)
+{
+    if (!auth()->check()) {
+        session(['url.intended' => url()->previous()]);
+        return redirect()->route('patient.register')
+            ->with('error', app()->getLocale() == 'ar'
+                ? 'يجب إنشاء حساب مريض أولاً'
+                : 'Please create a patient account first');
     }
+
+    $validated = $request->validate([
+        'name'             => 'required|string|max:255',
+        'email'            => 'nullable|email',
+        'phone'            => 'required|string',
+        'appointment_date' => 'nullable|date',
+        'notes'            => 'nullable|string',
+        'service_id'       => 'nullable',
+        'gender'           => 'nullable|in:male,female',
+        'center_id'        => 'required',
+    ]);
+
+    $email = Center::find($request->center_id)->user->email;
+    $url   = route('user.order.index');
+
+    Mail::raw("طلب حجز جديد! راجع الطلبات على لوحة التحكم: {$url}", function ($message) use ($email) {
+        $message->to($email)->subject('طلب حجز جديد');
+    });
+
+    Order::create($validated);
+
+    return redirect()->back()->with('success', 'Your order has been sent!');
+}
+
+public function about()
+{
+    return view('site.about');
+}
 }

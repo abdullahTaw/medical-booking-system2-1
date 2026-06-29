@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Validation\ValidationException;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -16,49 +16,34 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login');
     }
 
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
-        $request->authenticate();
+        $request->validate([
+            'email'    => ['required', 'string', 'email'],
+            'password' => ['required', 'string'],
+        ]);
+
+        if (!Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+            throw ValidationException::withMessages([
+                'email' => trans('auth.failed'),
+            ]);
+        }
+
         $request->session()->regenerate();
 
-        $user = $request->user();
+        $user = Auth::user();
 
-        // الأدمن — يدخل مباشرة
+
         if ($user->role === 'admin') {
-            return redirect()->intended('admin/dashboard');
+            return redirect()->route('admin.dashboard');
         }
 
-        // صاحب عيادة — تحقق من حالة الترخيص
-        if ($user->center) {
-            $status = $user->center->license_status;
-
-            // قيد المراجعة
-            if ($status === 'pending') {
-                Auth::guard('web')->logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-                return redirect()->route('login')->with('license_error',
-                    app()->getLocale() == 'ar'
-                        ? 'عيادتك لا تزال قيد المراجعة. سيصلك إيميل عند الموافقة.'
-                        : 'Your clinic is still under review. You will receive an email upon approval.'
-                );
-            }
-
-            // مرفوضة
-            if ($status === 'rejected') {
-                Auth::guard('web')->logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-                return redirect()->route('login')->with('license_error',
-                    app()->getLocale() == 'ar'
-                        ? 'تم رفض طلب عيادتك. يرجى التواصل مع الإدارة.'
-                        : 'Your clinic application was rejected. Please contact support.'
-                );
-            }
+        if ($user->role === 'patient') {
+            return redirect()->route('site.show');
         }
 
-        // عيادة موافق عليها
-        return redirect()->intended('dashboard');
+       
+        return redirect()->route('user.dashboard');
     }
 
     public function destroy(Request $request): RedirectResponse

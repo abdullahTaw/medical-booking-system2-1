@@ -9,7 +9,6 @@ class Center extends Model
 {
     protected $guarded = [];
 
-    // ===== Scopes =====
 
     public function scopeFilter(Builder $query, $search = null, $city_id = null, $category_id = null)
     {
@@ -30,13 +29,11 @@ class Center extends Model
         return $query->where('status', 'active');
     }
 
-    // ===== مساعد: هل الترخيص موافق عليه؟ =====
     public function isLicenseApproved(): bool
     {
         return $this->license_status === 'approved';
     }
 
-    // ===== Relations =====
 
     public function users()
     {
@@ -92,4 +89,18 @@ class Center extends Model
     {
         return $this->belongsTo(Currency::class);
     }
+    public function ratings()
+{
+    return $this->hasMany(Rating::class);
+}
+
+public function avgRating(): float
+{
+    return round($this->ratings()->avg('rating') ?? 0, 1);
+}
+
+public function ratingsCount(): int
+{
+    return $this->ratings()->count();
+}
 }

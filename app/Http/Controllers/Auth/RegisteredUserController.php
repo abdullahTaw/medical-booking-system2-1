@@ -23,18 +23,17 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name'             => ['required', 'string', 'max:255'],
-            'email'            => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
-            'password'         => ['required', 'confirmed', Rules\Password::defaults()],
-            'clinic_name'      => ['required', 'string', 'max:255'],
-            'category_id'      => ['required', 'integer'],
-            'country_id'       => ['required', 'integer'],
-            'city_id'          => ['required', 'integer'],
-            'address'          => ['required', 'string', 'max:255'],
-            'phone'            => ['required', 'string', 'max:20'],
-            // ===== الترخيص =====
-            'license_number'   => ['required', 'string', 'unique:centers,license_number'],
-            'license_file'     => ['required', 'file', 'mimes:pdf,jpeg,png,jpg', 'max:5120'],
+            'name'           => ['required', 'string', 'max:255'],
+            'email'          => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'password'       => ['required', 'confirmed', Rules\Password::defaults()],
+            'clinic_name'    => ['required', 'string', 'max:255'],
+            'category_id'    => ['required', 'integer'],
+            'country_id'     => ['required', 'integer'],
+            'city_id'        => ['required', 'integer'],
+            'address'        => ['required', 'string', 'max:255'],
+            'phone'          => ['required', 'string', 'max:20'],
+            'license_number' => ['required', 'string', 'unique:centers,license_number'],
+            'license_file'   => ['required', 'file', 'mimes:pdf,jpeg,png,jpg', 'max:5120'],
         ], [
             'license_number.required' => app()->getLocale() == 'ar' ? 'رقم الترخيص مطلوب' : 'License number is required',
             'license_number.unique'   => app()->getLocale() == 'ar' ? 'رقم الترخيص مستخدم بالفعل' : 'License number already exists',
@@ -43,17 +42,15 @@ class RegisteredUserController extends Controller
             'license_file.max'        => app()->getLocale() == 'ar' ? 'حجم الملف لا يتجاوز 5MB' : 'File size must not exceed 5MB',
         ]);
 
-        // رفع ملف الترخيص
         $license_file = $request->file('license_file')->store('licenses', 'files');
 
-        // إنشاء المستخدم
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
+            'role'     => 'user', // ✅ دور العيادة
         ]);
 
-        // إنشاء المركز مع الترخيص
         Center::create([
             'category_id'    => $request->category_id,
             'country_id'     => $request->country_id,
@@ -62,10 +59,9 @@ class RegisteredUserController extends Controller
             'center_name'    => $request->clinic_name,
             'center_address' => $request->address,
             'phone'          => $request->phone,
-            // ===== الترخيص =====
             'license_number' => $request->license_number,
             'license_file'   => $license_file,
-            'license_status' => 'pending', // تنتظر مراجعة الأدمن
+            'license_status' => 'pending',
         ]);
 
         event(new Registered($user));

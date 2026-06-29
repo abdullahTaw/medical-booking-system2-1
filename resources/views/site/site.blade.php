@@ -18,18 +18,212 @@
     @if(app()->getLocale() == 'ar')
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Cairo', sans-serif; }
-        .main-nav li a { letter-spacing: 0; }
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .main-nav li a {
+            letter-spacing: 0;
+        }
     </style>
     @endif
 
     <style>
-        .modal { display:none; position:fixed; z-index:1; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.4); padding-top:60px; }
-        .modal-content { background-color:#fff; margin:5% auto; padding:20px; border:1px solid #888; width:80%; max-width:500px; }
-        .close-btn { color:#aaa; font-size:28px; font-weight:bold; float:right; cursor:pointer; }
-        .close-btn:hover, .close-btn:focus { color:black; text-decoration:none; cursor:pointer; }
-        .lang-btn { background:transparent; border:1.5px solid #3498db; color:#3498db; border-radius:6px; padding:4px 12px; font-size:13px; cursor:pointer; font-weight:500; }
-        .lang-btn:hover { background:#3498db; color:#fff; }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .close-btn {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            float: right;
+            cursor: pointer;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: 1.5px solid #3498db;
+            color: #3498db;
+            border-radius: 6px;
+            padding: 4px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .lang-btn:hover {
+            background: #3498db;
+            color: #fff;
+        }
+
+        /* قائمة المريض المنسدلة */
+        .patient-dropdown-menu {
+            display: none;
+            position: absolute;
+
+                {
+                    {
+                    app()->getLocale()=='ar' ? 'right': 'left'
+                }
+            }
+
+            :0;
+            top:100%;
+            background:#fff;
+            border-radius:8px;
+            box-shadow:0 4px 16px rgba(0, 0, 0, 0.12);
+            min-width:160px;
+            z-index:9999;
+            overflow:hidden;
+        }
+
+        .patient-dropdown-menu.show {
+            display: block;
+        }
+
+        .patient-dropdown-menu a {
+            display: block;
+            padding: 10px 16px;
+            color: #333;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .patient-dropdown-menu a:hover {
+            background: #f5f5f5;
+        }
+
+        .patient-dropdown-menu a.logout {
+            color: #e74c3c;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        /* أزرار الموبايل في الـ aside */
+        .m-nav-auth {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 0 15px 20px;
+            border-top: 1px solid #eee;
+            padding-top: 16px;
+        }
+
+        .m-nav-auth a {
+            display: block;
+            padding: 9px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .m-nav-auth .btn-login {
+            border: 1px solid #ddd;
+            color: #333;
+        }
+
+        .m-nav-auth .btn-reg {
+            background: #3498db;
+            color: #fff;
+        }
+
+        .m-nav-auth .btn-dash {
+            border: 1px solid #ddd;
+            color: #333;
+        }
+
+        /* ===================== RESPONSIVE FIXES ===================== */
+
+        /* p-right: لا يضيق ولا يلتف بشكل عشوائي */
+        .h-bottom-inner .p-right {
+            flex-wrap: nowrap;
+        }
+
+        /* إخفاء أزرار سطح المكتب (دخول/تسجيل/داشبورد/قائمة المريض/اللغة)
+           على الشاشات الصغيرة، لأنها موجودة بالفعل داخل القائمة الجانبية (aside) */
+        @media (max-width: 991px) {
+            .desktop-auth-actions {
+                display: none !important;
+            }
+
+            .h-bottom-inner .p-right {
+                gap: 6px !important;
+            }
+        }
+
+        /* الخريطة (iframe) متجاوبة بالكامل */
+        .map-wrap {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            /* نسبة 16:9 */
+            height: 0;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .map-wrap iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            border: 0;
+        }
+
+        /* صناديق التواصل تلتف بشكل صحيح على الموبايل */
+        @media (max-width: 575px) {
+            .contact-boxes-wrap {
+                flex-direction: column;
+            }
+
+            .c-box.map {
+                width: 100%;
+            }
+        }
+
+        /* منع overflow أفقي عام */
+        html,
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        /* تصغير العناصر داخل p-right على الشاشات الصغيرة جداً */
+        @media (max-width: 420px) {
+            .lang-btn {
+                padding: 4px 8px;
+                font-size: 11px;
+            }
+        }
     </style>
 </head>
 
@@ -44,42 +238,6 @@
     </div>
 
     <header class="header accent-lightBlue">
-        <div class="h-top-container bg-gray">
-            <div class="container-stretch">
-                <div class="h-top-inner">
-                    <div class="p-left">
-                        <ul class="t-bar-menu">
-                            @if (Route::has('login'))
-                            <nav class="-mx-3 flex flex-1 justify-end" style="align-items:center; gap:8px;">
-                                @auth
-                                    <a href="{{ url('/dashboard') }}" class="rounded-md px-3 py-2 text-black">
-                                        {{ __('site.dashboard') }}
-                                    </a>
-                                @else
-                                    <a href="{{ route('login') }}" class="rounded-md px-3 py-2 text-black">
-                                        {{ __('site.login') }}
-                                    </a>
-                                    @if (Route::has('register'))
-                                        <a href="{{ route('register') }}" class="rounded-md px-3 py-2 text-black">
-                                            {{ __('site.register') }}
-                                        </a>
-                                    @endif
-                                @endauth
-
-                                {{-- زر تبديل اللغة --}}
-                                <form action="{{ route('locale.switch') }}" method="POST" style="display:inline">
-                                    @csrf
-                                    <input type="hidden" name="locale" value="{{ app()->getLocale() == 'en' ? 'ar' : 'en' }}">
-                                    <button type="submit" class="lang-btn">{{ __('site.language') }}</button>
-                                </form>
-
-                            </nav>
-                            @endif
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
         <div class="h-bottom-container">
             <div class="container-stretch">
                 <div class="h-bottom-inner">
@@ -95,13 +253,65 @@
                         <nav>
                             <ul class="main-nav">
                                 <li><a href="/">{{ __('site.home') }}</a></li>
-                                <li><a href="{{route('site.centers')}}">{{ __('site.clinics') }}</a></li>
-                                <li><a href="/">{{ __('site.blog') }}</a></li>
-                                <li><a href="#Contact">{{ __('site.contact') }}</a></li>
+                                <li><a href="{{ route('site.centers') }}">{{ __('site.clinics') }}</a></li>
+                                <li><a href="{{ route('site.show') }}#Contact">{{ __('site.contact') }}</a></li>
+                                <li><a href="{{ route('site.about') }}">{{ __('about_us') }}</a></li>
                             </ul>
                         </nav>
                     </div>
-                    <div class="p-right">
+
+                    {{-- ✅ p-right: الأزرار + اللغة + زر الموبايل --}}
+                    <div class="p-right" style="display:flex; align-items:center; gap:8px;">
+
+                        {{-- هذه الأزرار تظهر فقط على الشاشات الكبيرة (≥992px)
+                             لأنها مكررة داخل القائمة الجانبية m-nav-auth --}}
+                        <div class="desktop-auth-actions" style="display:flex; align-items:center; gap:8px;">
+                            @auth
+                            @if(auth()->user()->role === 'patient')
+                            {{-- قائمة منسدلة للمريض --}}
+                            <div style="position:relative;" class="patient-dropdown">
+                                <button type="button" onclick="document.getElementById('patientMenu').classList.toggle('show')"
+                                    style="background:transparent; border:1px solid #ddd; border-radius:6px; color:#333; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; padding:6px 12px; font-size:13px;">
+                                    <i class="fa-solid fa-user-circle"></i>
+                                    {{ auth()->user()->name }}
+                                    <i class="fa-solid fa-chevron-down" style="font-size:10px;"></i>
+                                </button>
+                                <div id="patientMenu" class="patient-dropdown-menu">
+                                    <a href="{{ route('patient.profile') }}">
+                                        <i class="fa-solid fa-id-card"></i>
+                                        {{ app()->getLocale() == 'ar' ? 'ملفي الشخصي' : 'My Profile' }}
+                                    </a>
+                                    <a href="javascript:;" onclick="document.getElementById('patient-logout-form').submit();" class="logout">
+                                        <i class="fa-solid fa-sign-out-alt"></i>
+                                        {{ app()->getLocale() == 'ar' ? 'تسجيل خروج' : 'Logout' }}
+                                    </a>
+                                    <form id="patient-logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">@csrf</form>
+                                </div>
+                            </div>
+                            @else
+                            {{-- داشبورد للعيادة أو الأدمن --}}
+                            <a href="{{ url('/dashboard') }}" style="font-size:13px; font-weight:600; color:#333; padding:6px 14px; border:1px solid #ddd; border-radius:6px; white-space:nowrap; text-decoration:none;">
+                                {{ __('site.dashboard') }}
+                            </a>
+                            @endif
+                            @else
+                            <a href="{{ route('login') }}" style="font-size:13px; font-weight:600; color:#333; padding:6px 14px; border:1px solid #ddd; border-radius:6px; white-space:nowrap; text-decoration:none;">
+                                {{ __('site.login') }}
+                            </a>
+                            @if (Route::has('register'))
+                            <a href="{{ route('register') }}" style="font-size:13px; font-weight:600; color:#fff; background:#3498db; padding:6px 14px; border-radius:6px; white-space:nowrap; text-decoration:none;">
+                                {{ __('site.register') }}
+                            </a>
+                            @endif
+                            @endauth
+
+                            <form action="{{ route('locale.switch') }}" method="POST" style="display:inline;">
+                                @csrf
+                                <input type="hidden" name="locale" value="{{ app()->getLocale() == 'en' ? 'ar' : 'en' }}">
+                                <button type="submit" class="lang-btn">{{ __('site.language') }}</button>
+                            </form>
+                        </div>
+
                         <button id="m-nav-open"><i class="fa-solid fa-bars"></i></button>
                     </div>
                 </div>
@@ -119,6 +329,34 @@
                 <li><a href="/">{{ __('site.blog') }}</a></li>
                 <li><a href="#Contact">{{ __('site.contact') }}</a></li>
             </ul>
+
+            {{-- ✅ أزرار الموبايل --}}
+            <div class="m-nav-auth">
+                @auth
+                @if(auth()->user()->role === 'patient')
+                <a href="{{ route('patient.profile') }}" class="btn-login">
+                    <i class="fa-solid fa-user-circle"></i> {{ auth()->user()->name }}
+                </a>
+                <a href="javascript:;" onclick="document.getElementById('m-logout-form').submit();" class="btn-login" style="color:#e74c3c;">
+                    {{ app()->getLocale() == 'ar' ? 'تسجيل خروج' : 'Logout' }}
+                </a>
+                <form id="m-logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">@csrf</form>
+                @else
+                <a href="{{ url('/dashboard') }}" class="btn-dash">{{ __('site.dashboard') }}</a>
+                @endif
+                @else
+                <a href="{{ route('login') }}" class="btn-login">{{ __('site.login') }}</a>
+                @if (Route::has('register'))
+                <a href="{{ route('register') }}" class="btn-reg">{{ __('site.register') }}</a>
+                @endif
+                @endauth
+
+                <form action="{{ route('locale.switch') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="locale" value="{{ app()->getLocale() == 'en' ? 'ar' : 'en' }}">
+                    <button type="submit" class="lang-btn" style="width:100%;">{{ __('site.language') }}</button>
+                </form>
+            </div>
         </div>
     </aside>
 
@@ -152,19 +390,15 @@
                             </div>
                         </form>
                         <div class="counter-sm">
-    <div class="s-counter">
-        <p class="number">
-            <span class="counter-number">{{ $centersCount }}</span>
-        </p>
-        <p class="text">{{ __('site.stat_clinic') }}</p>
-    </div>
-    <div class="s-counter">
-        <p class="number">
-            <span class="counter-number">{{ $usersCount }}</span>
-        </p>
-        <p class="text">{{ __('site.stat_user') }}</p>
-    </div>
-</div>
+                            <div class="s-counter">
+                                <p class="number"><span class="counter-number">{{ $centersCount }}</span></p>
+                                <p class="text">{{ __('site.stat_clinic') }}</p>
+                            </div>
+                            <div class="s-counter">
+                                <p class="number"><span class="counter-number">{{ $usersCount }}</span></p>
+                                <p class="text">{{ __('site.stat_user') }}</p>
+                            </div>
+                        </div>
                         <img class="shape" src="{{ asset('assets/images/shapes/hero-2-sm.png')}}" alt />
                     </div>
                 </div>
@@ -257,15 +491,21 @@
                 <div class="feat-box-s1-wrap">
                     <div class="feat-box-s1" data-aos="fade-right">
                         <div class="thumb"><img src="{{ asset('assets/images/icons/feature1-icon1.svg')}}" alt /></div>
-                        <div class="content"><h4>{{ __('site.feature_1') }}</h4></div>
+                        <div class="content">
+                            <h4>{{ __('site.feature_1') }}</h4>
+                        </div>
                     </div>
                     <div class="feat-box-s1" data-aos="fade-right" data-aos-delay="150">
                         <div class="thumb"><img src="{{ asset('assets/images/icons/feature1-icon2.svg')}}" alt /></div>
-                        <div class="content"><h4>{{ __('site.feature_2') }}</h4></div>
+                        <div class="content">
+                            <h4>{{ __('site.feature_2') }}</h4>
+                        </div>
                     </div>
                     <div class="feat-box-s1" data-aos="fade-right" data-aos-delay="150">
                         <div class="thumb"><img src="{{ asset('assets/images/icons/feature1-icon3.svg')}}" alt /></div>
-                        <div class="content"><h4>{{ __('site.feature_3') }}</h4></div>
+                        <div class="content">
+                            <h4>{{ __('site.feature_3') }}</h4>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -329,7 +569,7 @@
                                             </div>
                                         </div>
                                         <div class="map-wrap">
-                                            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d14600.380994918401!2d90.3665415!3d23.8152118!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x1dea3ec2f7a32054!2sQuomodoSoft!5e0!3m2!1sen!2sbd!4v1664687133594!5m2!1sen!2sbd" width="600" height="450" style="border:0;" allowfullscreen loading="lazy"></iframe>
+                                            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d14600.380994918401!2d90.3665415!3d23.8152118!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x1dea3ec2f7a32054!2sQuomodoSoft!5e0!3m2!1sen!2sbd!4v1664687133594!5m2!1sen!2sbd" allowfullscreen loading="lazy"></iframe>
                                         </div>
                                     </div>
                                 </div>
@@ -365,7 +605,7 @@
                             </div>
                         </form>
                         @if(session('success'))
-                            <div class="alert alert-success">{{ session('success') }}</div>
+                        <div class="alert alert-success">{{ session('success') }}</div>
                         @endif
                     </div>
                 </div>
@@ -380,7 +620,6 @@
         </div>
     </div>
 
-    {{-- Footer --}}
     <footer class="footer-s1 footer-s2">
         <div class="container">
             <div class="footer-subs-s2">
@@ -431,7 +670,7 @@
                         <li><a href="#"><i class="fa-brands fa-facebook"></i></a></li>
                         <li><a href="#"><i class="fa-brands fa-youtube"></i></a></li>
                     </ul>
-                    <p class="cr-text">©2024 {{ __('site.footer_rights') }}</p>
+                    <p class="cr-text">©{{ date('Y') }} {{ __('site.footer_rights') }}</p>
                 </div>
                 <div class="p-right">
                     <a href="#"><img src="{{ asset('assets/images/thumbs/p-gateway-img.png')}}" alt /></a>
@@ -454,9 +693,25 @@
     <script src="{{ asset('assets/js/plugin.js')}}"></script>
     <script src="{{ asset('assets/js/main.js')}}"></script>
     <script>
-        function openModal() { document.getElementById('simpleModal').style.display = "block"; }
-        function closeModal() { document.getElementById('simpleModal').style.display = "none"; }
-        @if(session('success')) openModal(); @endif
+        // إغلاق قائمة المريض عند النقر خارجها
+        document.addEventListener('click', function(e) {
+            var dd = document.querySelector('.patient-dropdown');
+            var menu = document.getElementById('patientMenu');
+            if (dd && menu && !dd.contains(e.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        function openModal() {
+            document.getElementById('simpleModal').style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById('simpleModal').style.display = "none";
+        }
+        @if(session('success')) openModal();
+        @endif
     </script>
 </body>
+
 </html>

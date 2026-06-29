@@ -8,18 +8,20 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Role
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-    public function handle(Request $request, Closure $next, $role)
+    public function handle(Request $request, Closure $next, $role): Response
     {
-        if($request->user()->role == $role){
+        $user = $request->user();
+
+        if ($user->role == $role) {
             return $next($request);
         }
+
+        if ($user->role === 'patient') {
+            return redirect()->route('site.show');
+        }
+
         $notification = trans('dash.you dont have permission to access this resource');
-        $notification = array('messege'=>$notification,'alert-type'=>'warning');
+        $notification = ['messege' => $notification, 'alert-type' => 'warning'];
         return redirect()->back()->with($notification);
     }
 }

@@ -32,5 +32,8 @@
 "Create country": "Create Country",
 "Edit country": "Edit Country",
 "Create city": "Create City",
-"Edit city": "Edit City"
+"Edit city": "Edit City",
+"licensed_by_moh":"Licensed by MOH",
+"verified":         "Verified",
+"about_us": "About Us"
 }

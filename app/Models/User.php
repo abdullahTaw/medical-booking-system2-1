@@ -22,6 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'phone',
     ];
 
     /**
@@ -52,4 +54,13 @@ class User extends Authenticatable
         return $this->hasOne(Center::class);
     }
 
+    public function isPatient(): bool
+    {
+        return $this->role === 'patient';
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
 }

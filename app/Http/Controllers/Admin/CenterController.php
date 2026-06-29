@@ -8,11 +8,9 @@ use App\Models\Center;
 use App\Models\Country;
 use App\Models\Category;
 use App\Models\Currency;
-use App\Mail\LicenseApprovedMail;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Str;
@@ -98,7 +96,7 @@ class CenterController extends Controller
             'longitude'        => $request->longitude,
             'license_number'   => $request->license_number,
             'license_file'     => $license_file,
-            'license_status'   => 'approved', // الأدمن يضيف مباشرة — موافق تلقائياً
+            'license_status'   => 'approved',
             'status'           => 'active',
         ]);
 
@@ -182,7 +180,7 @@ class CenterController extends Controller
         return response()->json($message);
     }
 
-    // ===== الموافقة على الترخيص — يرسل إيميل =====
+  
     public function approveLicense($id)
     {
         $center = Center::find($id);
@@ -190,19 +188,12 @@ class CenterController extends Controller
         $center->status         = 'active';
         $center->save();
 
-        // إرسال إيميل للعيادة
-        try {
-            Mail::to($center->user->email)->send(new LicenseApprovedMail($center));
-        } catch (\Exception $e) {
-            // لا نوقف العملية إذا فشل الإيميل
-        }
-
         return response()->json(
-            app()->getLocale() == 'ar' ? 'تمت الموافقة وإرسال الإيميل ✓' : 'Approved and email sent ✓'
+            app()->getLocale() == 'ar' ? 'تمت الموافقة ✓' : 'Approved ✓'
         );
     }
 
-    // ===== رفض الترخيص =====
+
     public function rejectLicense($id)
     {
         $center = Center::find($id);
